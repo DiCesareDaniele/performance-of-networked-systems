@@ -1,5 +1,5 @@
 
-def kaufman(C: int, p: list[float], b: list[int]):
+def kaufman(C: int, p: list[float], b: list[int]) -> list[float]:
     K = len(p)
     q = [0.0] * (C + 1)
     q[0] = 1.0
