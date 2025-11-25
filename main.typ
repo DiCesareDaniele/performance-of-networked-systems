@@ -9,18 +9,18 @@
     (
       name: "Daniele Di Cesare",
       affiliation: "VU Amsterdam",
-      email: "email@vu.nl",
+      email: "d.dicesare@student.vu.nl",
     ),
     (
       name: "Gabriel Marica",
       affiliation: "VU Amsterdam",
-      email: "email@vu.nl",
+      email: "g.marica@student.vu.nl",
     ),
   ),
   abstract: [This document is the submission of Daniele Di Cesare and Gabriel Marica for the first assignment of Performance of Networked Systems. #lorem(40)],
   lecturer: "Prof.dr. Rob van der Mei",
   date: "November 28, 2025",
-  spacing: 1cm,
+  spacing: 1.2cm,
 )
 
 #pagebreak()

@@ -1,5 +1,4 @@
 #import "@preview/cetz:0.4.2"
-#import "@preview/equate:0.3.2": equate, share-align
 
 #let nodes-iter(C, b) = {
   let (bx, by, bz) = b
@@ -167,47 +166,54 @@
   let (bx, by, bz) = b
   let (lx, ly, lz) = labels
 
-  show: equate
   set math.equation(numbering: "(1)")
-  share-align(
-    for (i, (c, (x, y, z))) in nodes-iter(C, b).enumerate() {
-      let lhs = ()
-      let rhs = ()
-      if c + bx <= C {
-        lhs.push($lambda_#lx$)
-        rhs.push($#if x != 0 { x + 1 } mu_#lx pi (#{ x + 1 },#y,#z)$)
-      }
-      if c + by <= C {
-        lhs.push($lambda_#ly$)
-        rhs.push($#if y != 0 { y + 1 } mu_#ly pi (#x,#{ y + 1 },#z)$)
-      }
-      if c + bz <= C {
-        lhs.push($lambda_#lz$)
-        rhs.push($#if z != 0 { z + 1 } mu_#lz pi (#x,#y,#{ z + 1 })$)
-      }
-      if x > 0 {
-        lhs.push(if x == 1 { $mu_#lx$ } else { $#x mu_#lx$ })
-        rhs.push($lambda_#lx pi (#{ x - 1 },#y,#z)$)
-      }
-      if y > 0 {
-        lhs.push(if y == 1 { $mu_#ly$ } else { $#y mu_#ly$ })
-        rhs.push($lambda_#ly pi (#x,#{ y - 1 },#z)$)
-      }
-      if z > 0 {
-        lhs.push(if z == 1 { $mu_#lz$ } else { $#z mu_#lz$ })
-        rhs.push($lambda_#lz pi (#x,#y,#{ z - 1 })$)
-      }
+  for (i, (c, (x, y, z))) in nodes-iter(C, b).enumerate() {
+    let lhs = ()
+    let rhs = ()
+    if c + bx <= C {
+      lhs.push($lambda_#lx$)
+      rhs.push($#if x != 0 { x + 1 } mu_#lx pi (#(x + 1),#y,#z)$)
+    }
+    if c + by <= C {
+      lhs.push($lambda_#ly$)
+      rhs.push($#if y != 0 { y + 1 } mu_#ly pi (#x,#(y + 1),#z)$)
+    }
+    if c + bz <= C {
+      lhs.push($lambda_#lz$)
+      rhs.push($#if z != 0 { z + 1 } mu_#lz pi (#x,#y,#(z + 1))$)
+    }
+    if x > 0 {
+      lhs.push(if x == 1 { $mu_#lx$ } else { $#x mu_#lx$ })
+      rhs.push($lambda_#lx pi (#(x - 1),#y,#z)$)
+    }
+    if y > 0 {
+      lhs.push(if y == 1 { $mu_#ly$ } else { $#y mu_#ly$ })
+      rhs.push($lambda_#ly pi (#x,#(y - 1),#z)$)
+    }
+    if z > 0 {
+      lhs.push(if z == 1 { $mu_#lz$ } else { $#z mu_#lz$ })
+      rhs.push($lambda_#lz pi (#x,#y,#(z - 1))$)
+    }
 
-      let par = lhs.len() != 1
-      let left = $#if par { $($ } #lhs.join($+$) #if par { $)$ }$
+    let par = lhs.len() != 1
+    let left = $#if par { $($ } #lhs.join($+$) #if par { $)$ }$
+    if rhs.len() > 2 {
+      let r1 = rhs.slice(0, 2)
+      let r2 = rhs.slice(2)
+      let right1 = $#r1.join($+$)$
+      let right2 = $#r2.join($+$)$
+      [$
+          left pi (#x,#y,#z) = & right1 \
+                               & + right2
+        $ #label("mk_" + str(i + 1))]
+    } else {
       let right = $#rhs.join($+$)$
-      text(
-        size: 0.8em,
-        [$ left pi (#x,#y,#z) & = right $ #label("mk_" + str(i + 1))],
-      )
-      linebreak()
-    },
-  )
+      [$
+          left pi (#x,#y,#z) = right
+        $ #label("mk_" + str(i + 1))]
+    }
+    linebreak()
+  }
 }
 
 #let state-prob(C, b, p) = {
@@ -246,15 +252,23 @@
 
   for (bk, lk) in b.zip(labels) {
     let block-states = ()
+    let non-block-states = ()
     let block-prob = 0.0
     for (i, (c, (x, y, z))) in nodes-iter(C, b).enumerate() {
       if c + bk > C {
         block-states.push($pi (#x,#y,#z)$)
         block-prob += prob.at(i)
+      } else {
+        non-block-states.push($pi (#x,#y,#z)$)
       }
     }
-    let rhs = block-states.join($+$)
-    $B_#lk = rhs = #block-prob$
+    if block-states.len() > non-block-states.len() {
+      let rhs = non-block-states.join($-$)
+      $B_#lk = 1 - rhs = #block-prob$
+    } else {
+      let rhs = block-states.join($+$)
+      $B_#lk = rhs = #block-prob$
+    }
     linebreak()
   }
 }
@@ -274,15 +288,15 @@
     for ((bk, pk), pfk) in b.zip(p).zip(pfrac) {
       if bk <= c {
         s += pk * bk * q.at(c - bk)
-        pieces.push($#pfk #if bk != 1 { $dot #bk$ } q (#{ c - bk })$)
+        pieces.push($#pfk #if bk != 1 { $dot #bk$ } q (#(c - bk))$)
       }
     }
     q.at(c) = s / c
     let sum = pieces.join($+$)
     if c == 1 {
-      $g (#c) = #sum = #{ s / c }$
+      $g (#c) = #sum = #(s / c)$
     } else {
-      $g (#c) = 1/#c (#sum) = #{ s / c }$
+      $g (#c) = 1/#c (#sum) = #(s / c)$
     }
     linebreak()
 

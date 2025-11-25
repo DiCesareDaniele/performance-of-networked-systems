@@ -39,30 +39,32 @@ times as small the blocking probability stays the same.
 
 We can immagine each call occuping a slot of random size $beta$, with this change the slot is divided into three equal parts $beta/3$, and each part is used by a different caller since the rate tripled.
 
-An analogy would be a leaky bucket (more on that later :P). If you triple how often you pour water but each time you pour a third the water the average water level will stays the same. So the probability that the bucket is full stays the same.
+An analogy would be a leaky bucket (more on that later :P). If you triple how often you pour water but each time you pour a third the water the average water level will stay the same. So the probability that the bucket is full stays the same.
 
 == 4. Multi-Rate Model Markov Chain
-#import "markov-chain.typ": *
+#import "multi-rate.typ": *
 
 #let C = 4
 #let b = (1, 2, 3)
 #let labels = ("voice", "low", "high")
 
 #let (sv, sl, sh) = labels
+#let (cv, cl, ch) = b
 
-#let lv = $lambda_#sv$
-#let ll = $lambda_#sl$
-#let lh = $lambda_#sh$
+#let (lv, ll, lh) = labels.map(l => $lambda_#l$)
+#let (bv, bl, bh) = labels.map(l => $beta_#l$)
+#let (mv, ml, mh) = labels.map(l => $mu_#l$)
+#let (rv, rl, rh) = labels.map(l => $rho_#l$)
+#let (nv, nl, nh) = labels.map(l => $n_#l$)
 
-#let bv = $beta_#sv$
-#let bl = $beta_#sl$
-#let bh = $beta_#sh$
-
-#let mv = $mu_#sv$
-#let ml = $mu_#sl$
-#let mh = $mu_#sh$
-
-TODO: write assumptions
+Assumptions:
++ Poisson processes of "calls" with rate $(lv, ll, lh)$
++ Average call duration is $(bv, bl, bh)$
++ Number of lines is N
++ Spatial arrival intensity for voice call is $lv prime$
++ Spatial arrival intensity for video call is $lambda_"video" prime$
++ Probability of a low-resolution video call is $P_"low"$
++ Cell area is A
 
 Parameters:
 + $A = 1.2"Km"^2$
@@ -74,9 +76,15 @@ Parameters:
 + $bl = bh = 3/10h$
 + $N = 4$
 
+The state space is:\
+$ S = {n = (nv,nl,nh) in I^3: #if cv != 1 { cv } nv + #if cl != 1 { b.at(1) } nl + #if ch != 1 { b.at(2) } nh <= 4} $
+
+The evolution of the number of calls $n = (nv,nl,nh)$ can be represented by the following Markov-chain:
 #draw-markov-chain(C, b, labels)
 
-== 5.
+== 5. Balance Equations
+We know that in equilibrium the rate-in must equal the rate-out. Using the transitions of the Markov-chain we can derive the following balance equations.
+
 #balance-equations(C, b, labels)
 #linebreak()
 
@@ -106,48 +114,72 @@ Parameters:
 // Derive $pi (1,0,1)$ from ...:\
 // $(lv + mh) pi (0,0,1)$
 
-TODO: derive solutions
+TODO: derive solutions & write normalization equation
 
-== 6.
-#let nv = $n_#sv$
-#let nl = $n_#sl$
-#let nh = $n_#sh$
-
-#let rv = $rho_#sv$
-#let rl = $rho_#sl$
-#let rh = $rho_#sh$
-
+== 6. Product-Form solution
 #let p = (30 * 1 / 12, 96 / 125 * 3 / 10, 24 / 125 * 3 / 10)
 #let pfrac = ($30 dot 1 / 12$, $96 / 125 dot 3 / 10$, $24 / 125 dot 3 / 10$)
 
+The equilibrium state probabilities can also be computed using the product-form formula:
 $
   & pi (nv,nl,nh) = frac(1, G) dot frac(rv^nv, nv!) dot frac(rl^nl, nl!) dot frac(rh^nh, nh!), "for" (nv,nl,nh) in S \
   & G := sum_(n in S) frac(rv^nv, nv!) dot frac(rl^nl, nl!) dot frac(rh^nh, nh!) \
   & "with" rv := lv bv, rl := ll bl, rh := lh bh
 $
 
-This gives us:\
+If we apply the formula to each state we get:\
 #product-form(C, b, labels, p)
 
-== 7.
-TODO: explain blocking prob
-TODO: 1 - probability of being accepted
+== 7. Blocking Probability
+The blocking probability is just the sum of probabilities of states in which a class is not accepted, or one minus the sum of the probabilities of states in which a class is accepted. We will use the former for the blocking probability of voice calls and the latter for the blocking probability of video calls (this way we have to write less states).
+
+If we look at the Marokov-chain we can notice that:
++ The voice calls are blocked in states ${(4,0,0), (2,1,0), (0,2,0), (1,0,1)}$
++ The low-resolution video calls are accepted in states ${(0,0,0), (1,0,0), (2,0,0), (0,1,0)}$
++ The high-resolution video calls are accepted in states ${(0,0,0), (1,0,0)}$
+
+This gives us the following blocking probabilities:\
 #blocking-prob(C, b, labels, p)
 
-== 8.
-TODO: explain kaufman roberts steps
+== 8. Kaufman-Roberts Solution
+Kaufman-Roberts works by defining $q(c)$ as the probability that c channels are occupied.
+Then $q(c)$ follows the following recurrence relation:
+
+$ q(c) = 1/c sum_(k=1)^K rho_k b_k q(c - b_k) $
+
+Which in our case is:
+
+$ q(c) = 1/c (rv #if cv != 1 { cv } q(c - 1) + rl #if cl != 1 { cl } q(c - 2) + rh #if ch != 1 { ch } q(c - 3)) $
+
+Instead of computing $q(c)$ directly lets start with a function $g "such that" g(0) = 1$ and then using the recurrence formula to compute $g(c) "for" c = 1,..,#C$. After that we can compute $q(c)$ by normalizing $g(c)$.
+
 #kaufman-roberts(C, b, labels, p, pfrac)
 
+Notice that we get the exact same probabilities as in exercise 7 (minus some floating point errors).
+
 == 9. Kaufman-Roberts Recursion in Python
-TODO: explain what the program is doing
+#import "@preview/codly:1.3.0": *
+#import "@preview/codly-languages:0.1.1": *
+
+#show: codly-init.with()
+#codly(languages: codly-languages)
 
 #let code = read("../scripts/kaufman.py")
-#box(
-  inset: 1em,
-  radius: 6pt,
-  fill: rgb("#f5f5f7"),
-  stroke: rgb("#d0d0d5"),
-  width: 100%,
-)[
-  #raw(code, lang: "py")
-]
+
+#figure(caption: "Kaufman-Roberts Recursion in Python")[
+  #codly-range(2, end: 24)
+  #raw(code, block: true, lang: "py")
+] <kaufman>
+
+If we look at the @kaufman, we see that it is doing the same procedure as in the previous exercise. We create an array q and we start with q[0] = 1. With dynamic programming we populate the whole q array using the recurrence formula and the previously computed values. Then we normalize and we compute the blocking probabilities of each class by summing all the q[c] such that c is not enough capacity to accept a new call for that class.
+
+#figure(caption: "Kaufman-Roberts Recursion main")[
+  #codly-range(26, end: 37)
+  #raw(code, block: true, lang: "py")
+] <kaufman-main>
+
+After running @kaufman-main we get:\
+$B_#sv = 0.1996735997252397$\
+$B_#sl = 0.45640869851448096$\
+$B_#sh = 0.7224714013479422$\
+Which are the exact same probabilities as in exercise 7 and 8 (minus some floating point errors).

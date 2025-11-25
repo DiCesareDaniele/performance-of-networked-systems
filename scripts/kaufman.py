@@ -25,7 +25,9 @@ def kaufman(C: int, p: list[float], b: list[int]) -> list[float]:
 
 def main():
     C = 4
-    p = [30 * 1/12, 96/125 * 3/10, 24/125 * 3/10]
+    lambdas = [30, 96/125, 24/125]
+    beta = [1/12, 3/10, 3/10]
+    p = [l * b for (l, b) in zip(lambdas, beta)]
     b = [1, 2, 3]
     B = kaufman(C, p, b)
     # Bv = 0.1996735997252397, Bl = 0.45640869851448096, Bh = 0.7224714013479422

@@ -1,9 +1,4 @@
 
-#show "RTTs": it => emph([#it])
-#show "RTT": it => emph([#it])
-#show "TCP": it => emph([#it])
-#show "HTTP": it => emph([#it])
-
 = IV. Performance of TCP-based networks
 
 == 17. Downside of TCP Slow Start
@@ -13,7 +8,7 @@ This issue is especially apparent when transferring many small files, by the tim
 
 == 18. Slow Start Transfer Times
 
-=== 15KB
+*15KB*\
 The client first establishes a TCP connection using the three-way handshake, which takes one RTT (60 ms).
 After the connection is established, the client transmits a single request packet to the server. This packet requires half RTT to reach the server.
 The server then processes the request for 50 ms and immediately begins transmitting the first response packet, which arrives at the client after the remaining half RTT.
@@ -28,10 +23,10 @@ The total time required is therefore:
 
 This results in a total transfer time of 350 ms.
 
-=== 25KB and 40KB
+*25KB and 40KB*\
 The procedure is identical to the 15KB case, except that transferring these larger files requires one additional congestion window doubling. This adds one more RTT to the Slow Start phase. Therefore, the total transfer time for both the 25KB and 40KB files is 410 ms.
 
-=== Final Results
+*Final Results*\
 The results can be summarized in the following table.
 #let file-data = (
   (size: 15, npackets: 11, rtts: 4, t: 350),
@@ -41,5 +36,5 @@ The results can be summarized in the following table.
 #table(
   columns: (1fr,) * 4,
   [*File size*], [*Number of packets*], [*Slow Start RTTs*], [*Transmission Time*],
-  ..file-data.map(d => ([#{ d.size }KB], [#d.npackets], [#d.rtts], [#{ d.t }ms])).flatten(),
+  ..file-data.map(d => ([#(d.size)KB], [#d.npackets], [#d.rtts], [#(d.t)ms])).flatten(),
 )

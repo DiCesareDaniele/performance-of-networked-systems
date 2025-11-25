@@ -10,7 +10,7 @@
 ) = {
   show heading.where(level: 1): set align(center)
 
-  let huge-size = 2.0em
+  let huge-size = 1.8em
   let big-size = 1.5em
   let small-size = 1.2em
   place(
