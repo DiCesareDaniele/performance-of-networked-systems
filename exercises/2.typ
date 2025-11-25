@@ -1,3 +1,4 @@
+#set math.equation(numbering: "(1)")
 
 = II. Optimal distribution of channels over neighboring cells in mobile voice networks
 
@@ -42,7 +43,7 @@ $
   q(n) & = g(n) / S_n
 $
 
-Where $g(c)$ is the un-normalized version of q(0) and g(0) := 1. Then:
+Where $g(c)$ is the un-normalized version of q(0) and g(0) = 1. Then:
 
 $
   B_n = q(n)/S_n & = frac(rho/n g(n - 1), S_(n - 1) + rho/n g(n - 1)) \
@@ -51,7 +52,7 @@ $
                  & = frac(rho B_(n-1), n + rho B_(n-1))
 $ <proof_erlang>
 
-So if we start with B = 0.0 we can apply the formula n times to compute $B_n$.
+So if we start with B = 1.0 we can apply the formula n times to compute $B_n$.
 
 #figure(caption: "Optimal channels distribution")[
   #codly-range(19, end: 20)

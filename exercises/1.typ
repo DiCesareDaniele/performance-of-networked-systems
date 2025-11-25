@@ -20,7 +20,7 @@ Parameters:
 We want to find the blocking probability.
 
 == 2. Blocking Probability
-Using Erlang Blocking Formula we know that the probability of having k blocked channels is:
+Using Erlang Blocking formula we know that the probability of having k blocked channels is:
 
 $ pi_k = frac((lambda beta)^k slash k!, sum_(i=0)^N (lambda beta)^i slash i!) $
 
@@ -72,7 +72,7 @@ Parameters:
 + $N = 4$
 + $P_"low" = 80%$
 + $lv = 30 frac(1, "h")$ #h(1fr) (same as before)
-+ $bv = 1/12"h"$ #h(1fr) (same as before)
++ $bv = 1/12"h"$ #h(1fr)
 + $lambda_"video" prime = frac(0.8, "h" dot "Km"^2)$
 + $ll = lambda_"video" prime A P_"low" = frac(0.8, "h" dot "Km"^2) dot 1.2"Km"^2 dot 0.8 = 96/125 frac(1, "h")$
 + $lh = lambda_"video" prime A (1 - P_"low") = frac(0.8, "h" dot "Km"^2) dot 1.2"Km"^2 dot 0.2 = 24/125 frac(1, "h")$
@@ -89,32 +89,6 @@ We know that in equilibrium the rate-in must equal the rate-out. Using the trans
 
 #balance-equations(C, b, labels)
 #linebreak()
-
-// Derive $pi (4,0,0)$ from @mk_5:\
-// $pi (4,0,0) = frac(lv, 4 mv) pi (3,0,0)$
-//
-// Derive $pi (3,0,0)$ from @mk_4 substituting ...:\
-// $pi (3,0,0) = frac(lv, 3 mv) pi (2,0,0)$
-//
-// Derive $pi (2,0,0)$ from ...:\
-// $(lv + ll + 2 mv) pi (2,0,0) = lv pi (2,0,0) + ml pi (2,1,0) + lv pi (1,0,0)\
-// (ll + 2 mv) pi (2,0,0) = ml pi (2,1,0) + lv pi (1,0,0)$
-//
-// Derive $pi (0,2,0)$ from ...:\
-// $pi (0,2,0) = frac(ll, 2 ml) pi (0,1,0)$
-//
-// Derive $pi (0,1,0)$ from ...:\
-// $(lv + ll + ml) pi (0,1,0) = mv pi (1,1,0) + ll pi (0,1,0) + ll pi (0,0,0)\
-// (lv + ml) pi (0,1,0) = mv pi (1,1,0) + ll pi (0,0,0)$
-//
-// Derive $pi (1,1,0)$ from ...:\
-// $(lv + mv + ml) pi (1,1,0) = 2 mv pi (2,1,0) + lv$
-//
-// Derive $pi (1,0,0)$ from ...:\
-//
-//
-// Derive $pi (1,0,1)$ from ...:\
-// $(lv + mh) pi (0,0,1)$
 
 TODO: derive solutions & write normalization equation
 
