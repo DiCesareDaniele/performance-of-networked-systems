@@ -9,10 +9,10 @@
   doc,
 ) = {
   show heading.where(level: 1): set align(center)
+  set math.equation(numbering: "(1)")
 
   let huge-size = 1.8em
   let big-size = 1.5em
-  let small-size = 1.2em
   place(
     top + center,
     float: true,
@@ -64,9 +64,7 @@
         *Abstract*
       ]
       align(left)[
-        #text(size: small-size)[
-          #abstract
-        ]
+        #abstract
       ]
     },
   )

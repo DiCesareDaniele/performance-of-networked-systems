@@ -166,7 +166,6 @@
   let (bx, by, bz) = b
   let (lx, ly, lz) = labels
 
-  set math.equation(numbering: "(1)")
   for (i, (c, (x, y, z))) in nodes-iter(C, b).enumerate() {
     let lhs = ()
     let rhs = ()
@@ -197,22 +196,8 @@
 
     let par = lhs.len() != 1
     let left = $#if par { $($ } #lhs.join($+$) #if par { $)$ }$
-    if rhs.len() > 2 {
-      let r1 = rhs.slice(0, 2)
-      let r2 = rhs.slice(2)
-      let right1 = $#r1.join($+$)$
-      let right2 = $#r2.join($+$)$
-      [$
-          left pi (#x,#y,#z) = & right1 \
-                               & + right2
-        $ #label("mk_" + str(i + 1))]
-    } else {
-      let right = $#rhs.join($+$)$
-      [$
-          left pi (#x,#y,#z) = right
-        $ #label("mk_" + str(i + 1))]
-    }
-    linebreak()
+    let right = $#rhs.join($+$)$
+    [+ $left pi (#x,#y,#z) = right$ #label("mk_" + str(i + 1))]
   }
 }
 

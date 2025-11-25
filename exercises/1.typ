@@ -4,17 +4,18 @@
 == 1. Problem Modeling
 
 Assumptions:
-+ Poisson process of "calls" with rate $lambda$
-+ Average call duration is $beta$
++ Cell area is A
 + Number of lines is N
 + Spatial arrival intensity is $lambda prime$
-+ Cell area is A
++ Poisson process of "calls" with rate $lambda$
++ Average call duration is $beta$
 
 Parameters:
 + $A = 1.2"Km"^2$
-+ $lambda = lambda prime A = frac(25, "h" dot "Km"^2) dot 1.2"Km"^2 = 30 frac(1, "h")$
-+ $beta = 1/12"h"$
 + $N = 4$
++ $lambda prime = frac(25, "h" dot "Km"^2)$
++ $lambda = lambda prime A = frac(25, "h" dot "Km"^2) 1.2"Km"^2 = 30 frac(1, "h")$
++ $beta = 1/12"h"$
 
 We want to find the blocking probability.
 
@@ -58,23 +59,24 @@ An analogy would be a leaky bucket (more on that later :P). If you triple how of
 #let (nv, nl, nh) = labels.map(l => $n_#l$)
 
 Assumptions:
-+ Poisson processes of "calls" with rate $(lv, ll, lh)$
-+ Average call duration is $(bv, bl, bh)$
++ Cell area is A
 + Number of lines is N
++ Probability of a low-resolution video call is $P_"low"$
 + Spatial arrival intensity for voice call is $lv prime$
 + Spatial arrival intensity for video call is $lambda_"video" prime$
-+ Probability of a low-resolution video call is $P_"low"$
-+ Cell area is A
++ Poisson processes of "calls" with rate $(lv, ll, lh)$
++ Average call duration is $(bv, bl, bh)$
 
 Parameters:
 + $A = 1.2"Km"^2$
++ $N = 4$
 + $P_"low" = 80%$
-+ $lv = lv prime A = frac(25, "h" dot "Km"^2) dot 1.2"Km"^2 = 30 frac(1, "h")$ #h(1fr) (same as before)
++ $lv = 30 frac(1, "h")$ #h(1fr) (same as before)
 + $bv = 1/12"h"$ #h(1fr) (same as before)
++ $lambda_"video" prime = frac(0.8, "h" dot "Km"^2)$
 + $ll = lambda_"video" prime A P_"low" = frac(0.8, "h" dot "Km"^2) dot 1.2"Km"^2 dot 0.8 = 96/125 frac(1, "h")$
 + $lh = lambda_"video" prime A (1 - P_"low") = frac(0.8, "h" dot "Km"^2) dot 1.2"Km"^2 dot 0.2 = 24/125 frac(1, "h")$
 + $bl = bh = 3/10h$
-+ $N = 4$
 
 The state space is:\
 $ S = {n = (nv,nl,nh) in I^3: #if cv != 1 { cv } nv + #if cl != 1 { b.at(1) } nl + #if ch != 1 { b.at(2) } nh <= 4} $
@@ -83,7 +85,7 @@ The evolution of the number of calls $n = (nv,nl,nh)$ can be represented by the 
 #draw-markov-chain(C, b, labels)
 
 == 5. Balance Equations
-We know that in equilibrium the rate-in must equal the rate-out. Using the transitions of the Markov-chain we can derive the following balance equations.
+We know that in equilibrium the rate-in must equal the rate-out. Using the transitions of the Markov-chain we can derive the following balance equations:
 
 #balance-equations(C, b, labels)
 #linebreak()
@@ -151,7 +153,7 @@ Which in our case is:
 
 $ q(c) = 1/c (rv #if cv != 1 { cv } q(c - 1) + rl #if cl != 1 { cl } q(c - 2) + rh #if ch != 1 { ch } q(c - 3)) $
 
-Instead of computing $q(c)$ directly lets start with a function $g "such that" g(0) = 1$ and then using the recurrence formula to compute $g(c) "for" c = 1,..,#C$. After that we can compute $q(c)$ by normalizing $g(c)$.
+Instead of computing $q(c)$ directly lets start with a function $g "such that" g(0) = 1$ and then using the recurrence formula to compute $g(c) "for" c = 1,..,#C$. After that we can compute $q(c)$ by normalizing $g(c)$. Then the blocking probability $B_i$ of class i is the sum of $q(c)$ such that $c + b_i > #C$.
 
 #kaufman-roberts(C, b, labels, p, pfrac)
 

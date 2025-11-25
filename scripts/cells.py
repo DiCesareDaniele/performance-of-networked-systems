@@ -1,8 +1,8 @@
 
 def erlang(p: list[float], N: int) -> float:
     B = 1.0
-    for k in range(1, N + 1):
-        B = (p * B) / (k + p * B)
+    for n in range(1, N + 1):
+        B = (p * B) / (n + p * B)
     return B
 
 def erlang_table(C: int, p: list[float]) -> list[list[float]]:
