@@ -48,6 +48,7 @@ An analogy would be a leaky bucket (more on that later :P). If you triple how of
 #let C = 4
 #let b = (1, 2, 3)
 #let labels = ("voice", "low", "high")
+#let labels-short = ("v", "l", "h")
 
 #let (sv, sl, sh) = labels
 #let (cv, cl, ch) = b
@@ -85,12 +86,39 @@ The evolution of the number of calls $n = (nv,nl,nh)$ can be represented by the 
 #draw-markov-chain(C, b, labels)
 
 == 5. Balance Equations
+Note that in this section #(sv), #(sl) and #(sl) were abbriviated to #(labels-short.at(0)), #(labels-short.at(1)), #(labels-short.at(2)), to make the formulas fit in a single line.
+
 We know that in equilibrium the rate-in must equal the rate-out. Using the transitions of the Markov-chain we can derive the following balance equations:
 
-#balance-equations(C, b, labels)
-#linebreak()
+#balance-equations(C, b, labels-short)
 
-TODO: derive solutions & write normalization equation
+Remember also that the sum of the probabilities has to be 1. To ensure that we find only one solution for the balance equations we will discard @mk_2 since it is the longhest. So we also need to impose that:
+
+#sum-prob(C, b, labels-short)
+
+#let n = nodes-iter(C, b).len()
+Now we have a system of #n equations and #n unknowns that we need to solve using a matrix solver.
+
+#let c1 = $1$
+#let c2 = $2$
+
+#let r1 = (c1, c2)
+#let r2 = (c1, c2)
+
+#matrix(C, b, labels-short, skip: 1)
+
+By running a linear solver in python we get the following result:\
+$pi (0,0,0) = 150000000 div 1891696937 = 0.07929388532915936$\
+$pi (1,0,0) = 375000000 div 1891696937 = 0.1982347133228984$\
+$pi (2,0,0) = 468750000 div 1891696937 = 0.247793391653623$\
+$pi (3,0,0) = 390625000 div 1891696937 = 0.20649449304468584$\
+$pi (4,0,0) = 244140625 div 1891696937 = 0.12905905815292865$\
+$pi (0,1,0) = 34560000 div 1891696937 = 0.018269311179838318$\
+$pi (1,1,0) = 86400000 div 1891696937 = 0.04567327794959579$\
+$pi (2,1,0) = 108000000 div 1891696937 = 0.05709159743699474$\
+$pi (0,2,0) = 3981312 div 1891696937 = 0.002104624647917374$\
+$pi (0,0,1) = 8640000 div 1891696937 = 0.004567327794959579$\
+$pi (1,0,1) = 21600000 div 1891696937 = 0.011418319487398947$
 
 == 6. Product-Form solution
 #let p = (30 * 1 / 12, 96 / 125 * 3 / 10, 24 / 125 * 3 / 10)
@@ -105,6 +133,8 @@ $
 
 If we apply the formula to each state we get:\
 #product-form(C, b, labels, p)
+
+Notice that we get the exact same probabilities as in exercise 5 (minus some floating point errors).
 
 == 7. Blocking Probability
 The blocking probability is just the sum of probabilities of states in which a class is not accepted, or one minus the sum of the probabilities of states in which a class is accepted. We will use the former for the blocking probability of voice calls and the latter for the blocking probability of video calls (this way we have to write less states).

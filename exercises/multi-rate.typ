@@ -1,4 +1,5 @@
 #import "@preview/cetz:0.4.2"
+#import "@preview/equate:0.3.2": equate, share-align
 
 #let nodes-iter(C, b) = {
   let (bx, by, bz) = b
@@ -162,43 +163,140 @@
   )
 }
 
+#let eq(body) = context {
+  let c = counter(math.equation).get()
+  counter(math.equation).update(0)
+  body
+  counter(math.equation).update(c)
+}
+
 #let balance-equations(C, b, labels) = {
+  eq({
+    show: equate.with(breakable: true)
+    set math.equation(numbering: (.., x) => [B.#x], supplement: "Balance Equation")
+
+    let (bx, by, bz) = b
+    let (lx, ly, lz) = labels
+
+    share-align(
+      for (i, (c, (x, y, z))) in nodes-iter(C, b).enumerate() {
+        let lhs = ()
+        let rhs = ()
+        if c + bx <= C {
+          lhs.push($lambda_#lx$)
+          rhs.push($#if x != 0 { x + 1 } mu_#lx pi (#(x + 1),#y,#z)$)
+        }
+        if c + by <= C {
+          lhs.push($lambda_#ly$)
+          rhs.push($#if y != 0 { y + 1 } mu_#ly pi (#x,#(y + 1),#z)$)
+        }
+        if c + bz <= C {
+          lhs.push($lambda_#lz$)
+          rhs.push($#if z != 0 { z + 1 } mu_#lz pi (#x,#y,#(z + 1))$)
+        }
+        if x > 0 {
+          lhs.push(if x == 1 { $mu_#lx$ } else { $#x mu_#lx$ })
+          rhs.push($lambda_#lx pi (#(x - 1),#y,#z)$)
+        }
+        if y > 0 {
+          lhs.push(if y == 1 { $mu_#ly$ } else { $#y mu_#ly$ })
+          rhs.push($lambda_#ly pi (#x,#(y - 1),#z)$)
+        }
+        if z > 0 {
+          lhs.push(if z == 1 { $mu_#lz$ } else { $#z mu_#lz$ })
+          rhs.push($lambda_#lz pi (#x,#y,#(z - 1))$)
+        }
+
+        let par = lhs.len() != 1
+        let lhs = $#if par { $($ } #lhs.join($+$) #if par { $)$ }$
+        let rhs = $#rhs.join($+$)$
+        [
+          $ lhs pi (#x,#y,#z) & = rhs $ #label("mk_" + str(i + 1))
+        ]
+      },
+    )
+  })
+}
+
+#let sum-prob(C, b, labels) = {
+  let prob = ()
+  for (_, (x, y, z)) in nodes-iter(C, b) {
+    prob.push($pi (#x, #y, #z)$)
+  }
+  let prob-sum = prob.join($+$)
+  $#prob-sum = 1$
+}
+
+#let matrix(C, b, labels, skip: 0) = {
   let (bx, by, bz) = b
   let (lx, ly, lz) = labels
 
-  for (i, (c, (x, y, z))) in nodes-iter(C, b).enumerate() {
+  let to_key(state) = {
+    let (x, y, z) = state
+    str(x) + "-" + str(y) + "-" + str(z)
+  }
+
+  let nodes = nodes-iter(C, b)
+  let n = nodes.len()
+  let nodes-index = (:)
+  for (i, (_, state)) in nodes.enumerate() {
+    nodes-index.insert(to_key(state), i)
+  }
+
+  let to_idx(state) = {
+    nodes-index.at(to_key(state))
+  }
+
+  let rows = ()
+  for (i, (c, (x, y, z))) in nodes.enumerate() {
+    if i == skip {
+      continue
+    }
+    let row = ($0$,) * n
     let lhs = ()
-    let rhs = ()
     if c + bx <= C {
       lhs.push($lambda_#lx$)
-      rhs.push($#if x != 0 { x + 1 } mu_#lx pi (#(x + 1),#y,#z)$)
+      let idx = to_idx((x + 1, y, z))
+      row.at(idx) = $- #if x != 0 { x + 1 } mu_#lx$
     }
     if c + by <= C {
       lhs.push($lambda_#ly$)
-      rhs.push($#if y != 0 { y + 1 } mu_#ly pi (#x,#(y + 1),#z)$)
+      let idx = to_idx((x, y + 1, z))
+      row.at(idx) = $- #if y != 0 { y + 1 } mu_#ly$
     }
     if c + bz <= C {
       lhs.push($lambda_#lz$)
-      rhs.push($#if z != 0 { z + 1 } mu_#lz pi (#x,#y,#(z + 1))$)
+      let idx = to_idx((x, y, z + 1))
+      row.at(idx) = $- #if z != 0 { z + 1 } mu_#lz$
     }
     if x > 0 {
       lhs.push(if x == 1 { $mu_#lx$ } else { $#x mu_#lx$ })
-      rhs.push($lambda_#lx pi (#(x - 1),#y,#z)$)
+      let idx = to_idx((x - 1, y, z))
+      row.at(idx) = $-lambda_#lx$
     }
     if y > 0 {
       lhs.push(if y == 1 { $mu_#ly$ } else { $#y mu_#ly$ })
-      rhs.push($lambda_#ly pi (#x,#(y - 1),#z)$)
+      let idx = to_idx((x, y - 1, z))
+      row.at(idx) = $-lambda_#ly$
     }
     if z > 0 {
       lhs.push(if z == 1 { $mu_#lz$ } else { $#z mu_#lz$ })
-      rhs.push($lambda_#lz pi (#x,#y,#(z - 1))$)
+      let idx = to_idx((x, y, z - 1))
+      row.at(idx) = $-lambda_#lz$
     }
-
-    let par = lhs.len() != 1
-    let left = $#if par { $($ } #lhs.join($+$) #if par { $)$ }$
-    let right = $#rhs.join($+$)$
-    [+ $left pi (#x,#y,#z) = right$ #label("mk_" + str(i + 1))]
+    row.at(i) = lhs.join($+$)
+    rows.push(row)
   }
+  rows.push((1,) * n)
+  let a = math.mat(
+    ..rows,
+  )
+  let col = ((0,),) * n
+  col.at(n - 1) = (1,)
+  let b = math.mat(
+    ..col,
+  )
+  $#a x = #b$
 }
 
 #let state-prob(C, b, p) = {

@@ -20,7 +20,6 @@ which gives us:\
 }
 
 == 11. Optimal distribution of channels
-
 #import "@preview/codly:1.3.0": *
 #import "@preview/codly-languages:0.1.1": *
 
@@ -77,7 +76,7 @@ $n_4 = 10$\
 $n_5 = 13$\
 
 == 12. Optimal distribution below 1%
-For this problem we can reuse the function from the previous exercise and keep increasing the capacity until we get a blocking probability less than 1%.
+For this problem we can reuse the function from the previous exercise and keep increasing the capacity until we get a blocking probability less than 1%. A more optimal approach to further improve performance of the algorithm would be to use binary search, but the code run already fast enough so we keept the more simple solution.
 
 #figure(caption: "Optimal channels distribution below 1%")[
   #codly-range(41, end: 48)
