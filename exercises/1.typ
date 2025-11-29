@@ -86,7 +86,7 @@ The evolution of the number of calls $n = (nv,nl,nh)$ can be represented by the 
 #draw-markov-chain(C, b, labels)
 
 == 5. Balance Equations
-Note that in this section #(sv), #(sl) and #(sl) were abbriviated to #(labels-short.at(0)), #(labels-short.at(1)), #(labels-short.at(2)), to make the formulas fit in a single line.
+Note that in this section #(sv), #(sl) and #(sh) were abbriviated to #(labels-short.at(0)), #(labels-short.at(1)) and #(labels-short.at(2)) to make the formulas fit in a single line.
 
 We know that in equilibrium the rate-in must equal the rate-out. Using the transitions of the Markov-chain we can derive the following balance equations:
 

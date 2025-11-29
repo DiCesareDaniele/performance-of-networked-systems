@@ -60,7 +60,7 @@ So if we start with B = 1.0 we can apply the formula n times to compute $B_n$.
   #raw(code, block: true, lang: "py")
 ] <optimal>
 
-In @optimal we have a function that iters over all the possible distributions of channels and calculates the overall blocking probability. It keeps track of the minimum and returns it. To iterate over all the possible channel distributions we could naively iterate over all possible 5-tuple $n in Z_C^5$ and check if it is a valid channel distribution given our constraints. But that would be inefficent. Instead what we can do is chose the number of channels for the third cell, now we know that to be a valid channel distribution should have $(n_1 + n_2 <= C - n_3) and (n_4 + n_5 <= C - n_3)$, but since we are interested in the minimum it does not make sense to use less channels than what we are given, so we will only consider the case that $(n_1 + n_2 = C - n_3) and (n_4 + n_5 = C - n_3)$. So once we have chosen $n_3$ we can iter over all the possible $n_1 "and" n_4$ and from that constraints calculate $n_2 "and" n_5$. Reducing the runtime complexity from $O(C^5) "to" O(C^3)$.
+In @optimal we have a function that iters over all the possible distributions of channels and calculates the overall blocking probability. It keeps track of the minimum and returns it. To iterate over all the possible channel distributions we could naively iterate over all possible 5-tuple $n in Z_C^5$ and check if it is a valid channel distribution given our constraints. But that would be inefficent. Instead what we can do is chose the number of channels for the third cell, now we know that to be a valid channel distribution it should have $(n_1 + n_2 <= C - n_3) and (n_4 + n_5 <= C - n_3)$, but since we are interested in the minimum it does not make sense to use less channels than what we are given, so we will only consider the case that $(n_1 + n_2 = C - n_3) and (n_4 + n_5 = C - n_3)$. So once we have chosen $n_3$ we can iter over all the possible $n_1 "and" n_4$ and from the constraints calculate $n_2 "and" n_5$. Reducing the runtime complexity from $O(C^5) "to" O(C^3)$.
 
 #figure(caption: "Optimal channels distribution main")[
   #codly-range(41, end: 52)
@@ -76,7 +76,7 @@ $n_4 = 10$\
 $n_5 = 13$\
 
 == 12. Optimal distribution below 1%
-For this problem we can reuse the function from the previous exercise and keep increasing the capacity until we get a blocking probability less than 1%. A more optimal approach to further improve performance of the algorithm would be to use binary search, but the code run already fast enough so we keept the more simple solution.
+For this problem we can reuse the function from the previous exercise and keep increasing the capacity until we get a blocking probability less than 1%. A more optimal approach would be to use binary search, but the code was already fast enough so we keept the simpler solution.
 
 #figure(caption: "Optimal channels distribution below 1%")[
   #codly-range(41, end: 48)
